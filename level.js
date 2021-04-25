@@ -80,7 +80,7 @@ module.exports.addPoints = async (message) => {
                     search.level += 1
                     await channel.send(createEmbed(user, search.level, '😈', 'https://i.ibb.co/ZHsbKTr/tenor-8.gif'))
                     break;
-                case 4:
+                case 2500:
                     // LEVEL 10
                     search.level += 1
                     // Role VIP
