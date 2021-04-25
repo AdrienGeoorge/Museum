@@ -116,7 +116,7 @@ module.exports.getTopLevels = async (bot, channel) => {
         .setColor('#A76C22')
     for (let i = 0; i < 10; i++) {
         if (sort[i]) {
-            user = await bot.users.fetch('303627373990117387')
+            user = await bot.users.fetch(sort[i].id)
             top += '**' + (i + 1) + '.** ' + user.username + '#' + user.discriminator + ' with **' + sort[i].points + ' points**.\n'
         }
     }
