@@ -5,6 +5,7 @@ const bot = new Client({
 const config = require('./config.json')
 const messageReaction = require('./messageReaction.js')
 const messageLogs = require('./messageLogs.js')
+const {addPoints, getTopLevels} = require('./level.js')
 
 const {
     createCountriesEmbed,
@@ -38,6 +39,7 @@ bot.on('guildMemberAdd', async member => {
 
 bot.on('message', async message => {
         if (message.type !== 'DEFAULT' || message.author.bot) return
+        await addPoints(message)
         const args = message.content.trim().split(/ +/)
         const commandName = args.shift().toLowerCase()
         if (!commandName.startsWith(config.prefix)) return
@@ -50,21 +52,21 @@ bot.on('message', async message => {
                 const embed = new MessageEmbed()
                     .setTitle('Liste des commandes')
                     .setColor('#EEEADA')
-                    .addField('**>social**', 'Permet de voir la liste de nos réseaux sociaux')
+                    .addField('**>social**', 'Show our social networks')
+                    .addField('**>top**', 'Show top levels')
                 if (message.member.hasPermission('MANAGE_MESSAGES')) {
-                    embed.addField('**>delete [number]**', 'Permet de supprimer [number] messages')
+                    embed.addField('**>delete [number]**', 'Delete [number] messages')
+                }
+                if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
+                    embed.addField('**>discord [@roleServer] [lienDiscord] [lienLogo]**', 'Share a partner\'s Discord server')
                 }
                 if (message.member.roles.cache.get('823665644989710416')) {
-                    embed.addField('**>publish [links]**', 'Permet de créer une nouvelle annonce indiquant qu\'une publication a été faite sur les réseaux sociaux')
-                    embed.addField('**>star [@user] [links]**', 'Poster un message dans le channel stars avec le lien du réseau social')
+                    embed.addField('**>publish [links]**', 'Create an announcement indicating a publication on our social networks')
+                    embed.addField('**>star [@user] [links]**', 'Post a message in star channel with the social network\'s link')
                 }
                 if (message.member.roles.cache.get('823293841288200252')) {
-                    embed.addField('**>rolecountries**', 'Créer le embed pays')
-                    embed.addField('**>roletalents**', 'Créer le embed talents')
-                    embed.addField('**>roleservers**', 'Créer le embed serveurs')
-                    embed.addField('**>rolenotifications**', 'Créer le embed notifications')
-                    embed.addField('**>addRole [countries/talents/servers/notifications] [label] [role] [emoji]**', 'Permet d\'ajouter un rôle à une liste du channel rôles')
-                    embed.addField('**>deleteRole [countries/talents/servers/notifications] [role]**', 'Permet de supprimer un rôle à une liste du channel rôles')
+                    embed.addField('**>addRole [countries/talents/servers/notifications] [label] [role] [emoji]**', 'Add a new role')
+                    embed.addField('**>deleteRole [countries/talents/servers/notifications] [role]**', 'Delete role')
                 }
                 await message.channel.send(embed)
             }
@@ -72,12 +74,34 @@ bot.on('message', async message => {
             // Social networks list
             if (command === 'social') {
                 await message.delete()
-                let response = 'Salut ' + message.author.toString() + ', voici nos réseaux:\n'
+                let response = 'Hi ' + message.author.toString() + ', these are our social networks:\n'
                 response += '<:insta:823909790370758698>┇ Instagram: https://www.instagram.com/habbomuseum\n'
                 response += '<:fb:826046421014806539>┇ Facebook : https://www.facebook.com/habbomuseum\n'
                 response += '<:twitter:823909833022373919>┇ Twitter : https://twitter.com/habbomuseum\n'
                 response += '<:discord:823910071103914004>┇ Discord : https://discord.gg/wsgwKV3Y7C\n'
                 await message.channel.send(response)
+            }
+
+            if (command === 'top') {
+                await message.delete()
+                await getTopLevels(bot, message.channel)
+            }
+
+            // Rôle partner requis
+            if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
+                // Delete messages
+                if (command === 'discord') {
+                    await message.delete()
+                    let response = `✨┇ Discover ${args[0].toString()} on <@&829832855865524325> ┇\n\n`
+                    response += '<:discord:823910071103914004> Join our partner\'s community : ' + args[1]
+                    if (args[2]) {
+                        await bot.channels.cache.get(config.channelDiscord).send(response, {files: [args[2]]})
+                    } else {
+                        await bot.channels.cache.get(config.channelDiscord).send(response)
+                    }
+                }
+            } else {
+                message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
             }
 
             // Rôle staff requis
@@ -87,11 +111,11 @@ bot.on('message', async message => {
                     await message.delete()
 
                     if (args.length > 0) {
-                        let response = '<:important:823909697857912923>┇ NOUVEAU POST SUR NOS RÉSEAUX\n\n'
+                        let response = '<:important:823909697857912923>┇ NEW POST ON OUR SOCIAL NETWORKS\n\n'
                         response += '<:important:823909697857912923>┇ <@&823916492470747156>\n\n'
-                        response += ':unicorn:┇ Un nouveau post a vu le jour sur nos réseaux sociaux.\n'
-                        response += ':speech_balloon:┇ Nous vous invitons à lâcher un petit j’aime, un commentaire et à partager.\n\n'
-                        response += '*N’hésitez pas à nous envoyer vos créations dans les salons dédiés*\n\n'
+                        response += ':unicorn:┇ A new post has appeared on our social networks.\n'
+                        response += ':speech_balloon:┇ We invite you to leave a little like, comment and share.\n\n'
+                        response += '*Do not hesitate to send us your creations in the dedicated channels.*\n\n'
 
                         for (let i = 0; i < args.length; i++) {
                             if (args[i].includes('instagram')) {
@@ -103,34 +127,34 @@ bot.on('message', async message => {
                             }
                         }
 
-                        response += '\n<:discord:823910071103914004>┇ Notre serveur discord : https://discord.gg/wsgwKV3Y7C\n\n - ' + message.author.toString()
+                        response += '\n<:discord:823910071103914004>┇ Our discord server : https://discord.gg/wsgwKV3Y7C\n\n - ' + message.author.toString()
 
                         bot.channels.cache.get(config.channelSocial).send(response)
                     } else {
-                        message.channel.send('<:refuse:823910204613722142> Tu dois renseigner les liens des publications !').then((msg) => msg.delete({timeout: 3000}))
+                        message.channel.send('<:refuse:823910204613722142> You must fill in the links of the publications!').then((msg) => msg.delete({timeout: 3000}))
                     }
                 }
 
                 // Delete messages
                 if (command === 'delete') {
                     await message.delete()
-                    !message.member.hasPermission('MANAGE_MESSAGES') && message.channel.send('<:refuse:823910204613722142> Tu n\'as pas la permission...').then((msg) => msg.delete({timeout: 3000}))
+                    !message.member.hasPermission('MANAGE_MESSAGES') && message.channel.send('<:refuse:823910204613722142> You don\'t have permission...').then((msg) => msg.delete({timeout: 3000}))
                     if (args[0] !== undefined) {
                         if (args[0] <= 100) {
                             message.channel.bulkDelete(parseInt(args[0]))
-                            message.channel.send(`<:valide:823910319092531201> À ton service! J'ai supprimé ${args[0]} message(s)!`).then((msg) => msg.delete({timeout: 3000}))
+                            message.channel.send(`<:valide:823910319092531201> At your service! I have deleted ${args[0]} message(s)!`).then((msg) => msg.delete({timeout: 3000}))
                         } else {
-                            message.channel.send('<:refuse:823910204613722142> Je ne peux pas supprimer plus de 100 messages à la fois et de plus de 14 jours.').then((msg) => msg.delete({timeout: 3000}))
+                            message.channel.send('<:refuse:823910204613722142> I cannot delete more than 100 posts at a time and older than 14 days.').then((msg) => msg.delete({timeout: 3000}))
                         }
                     } else {
-                        message.channel.send('<:refuse:823910204613722142> Tu dois spécifier un nombre de messages à supprimer!').then((msg) => msg.delete({timeout: 3000}))
+                        message.channel.send('<:refuse:823910204613722142> You must specify a number of messages to delete!').then((msg) => msg.delete({timeout: 3000}))
                     }
                 }
 
                 // Delete messages
                 if (command === 'star') {
                     await message.delete()
-                    let response = `✨┇ Découvrez ${args[0].toString()} sur les réseaux sociaux ┇ <@&823707326967709747>\n\n`
+                    let response = `✨┇ Discover ${args[0].toString()} on social networks ┇ <@&823707326967709747>\n\n`
 
                     for (let i = 1; i < args.length; i++) {
                         if (args[i].includes('instagram')) {
@@ -149,7 +173,7 @@ bot.on('message', async message => {
                     bot.channels.cache.get(config.channelStars).send(response)
                 }
             } else {
-                message.channel.send('<:refuse:823910204613722142> Tu n\as pas les droits pour éxécuter cette commande').then((msg) => msg.delete({timeout: 3000}))
+                message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
             }
 
             // Rôle queen requis
@@ -196,7 +220,7 @@ bot.on('message', async message => {
                     await deleteRole(bot, message, args)
                 }
             } else {
-                message.channel.send('<:refuse:823910204613722142> Tu n\as pas les droits pour éxécuter cette commande').then((msg) => msg.delete({timeout: 3000}))
+                message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
             }
         }
     }
