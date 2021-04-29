@@ -1,7 +1,6 @@
 const fs = require('fs')
 const fileName = './config.json'
 const config = require('./config.json')
-const path = require("path")
 const {registerFont, createCanvas, loadImage} = require('canvas')
 const {MessageAttachment} = require('discord.js')
 
@@ -21,11 +20,11 @@ module.exports = client => {
         const {guild} = member
         const channel = guild.channels.cache.get(config.channelWelcome)
 
-        registerFont(path.resolve('./assets/LEMONMILK-Medium.otf'), {family: 'Lemon'})
+        registerFont('./assets/LEMONMILK-Medium.otf', {family: 'Lemon'})
         const canvas = createCanvas(800, 400)
         const ctx = canvas.getContext('2d')
 
-        const background = await loadImage(path.resolve('banner.jpg'))
+        const background = await loadImage('./assets/banner.jpg')
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
 
         ctx.strokeStyle = '#EEEADA'
