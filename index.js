@@ -5,6 +5,8 @@ const bot = new Client({
 const config = require('./config.json')
 const messageReaction = require('./messageReaction.js')
 const messageLogs = require('./messageLogs.js')
+const welcomeMessage = require('./welcomeMessage.js')
+const {createWelcomeMessage, setWelcomeChannel, simJoin} = require('./welcomeMessage')
 const {addPoints, getTopLevels, getRank} = require('./level.js')
 
 const {
@@ -16,25 +18,11 @@ const {
     deleteRole
 } = require('./messageReaction')
 
-const {createWelcomeMessage} = require('./welcomeMessage')
 
 bot.login(config.token).then(() => console.log('Connexion du bot...'))
 
 bot.on('ready', () => {
     console.log('Je suis connecté!')
-})
-
-bot.on('guildMemberAdd', async member => {
-    const message = "**HABBO MUSEUM**\n\nBienvenue, Welcome, Bienvenidos, Bem vindo! :wave:\n\n" +
-        ":flag_fr: Veuillez réagir avec la réaction dans le salon #rules pour obtenir le rôle :unicorn: — Membre.\n" +
-        "N'oubliez pas de choisir votre pays, votre serveur, vos talents, et les notifications que vous voulez recevoir.\n\n" +
-        ":flag_gb: Please react with the reaction in the channel #rules to get the role :unicorn: — Member.\n" +
-        "Don't forget to choose your country, your server, your talents, and notifications would you want to receive.\n\n" +
-        ":flag_pt: Por favor, reaja com a reação na sala #rules para obter a função :unicorn: — Membro.\n" +
-        "Não se esqueça de escolher o seu país, o seu servidor, os seus talentos e as notificações que deseja receber.\n\n" +
-        ":flag_es: Por favor, reaccione con la reacción en el salon #rules para conseguir la función :unicorn: — Miembro.\n" +
-        "No olvides elegir tu país, tu servidor, tus talentos y las notificaciones que quieres recibir."
-    await member.send(message)
 })
 
 bot.on('message', async message => {
@@ -225,6 +213,18 @@ bot.on('message', async message => {
                     await message.delete()
                     await deleteRole(bot, message, args)
                 }
+
+                // Set welcome channel
+                if (command === 'setwelcome') {
+                    await message.delete()
+                    await setWelcomeChannel(message.channel)
+                }
+
+                // Simulate a join
+                if (command === 'simjoin') {
+                    await message.delete()
+                    await simJoin(bot, message)
+                }
             } else {
                 message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
             }
@@ -234,3 +234,4 @@ bot.on('message', async message => {
 
 messageReaction(bot)
 messageLogs(bot)
+welcomeMessage(bot)

@@ -1,6 +1,70 @@
 const fs = require('fs')
 const fileName = './config.json'
 const config = require('./config.json')
+const {registerFont, createCanvas, loadImage} = require('canvas')
+const {MessageAttachment} = require('discord.js')
+
+module.exports = client => {
+    client.on('guildMemberAdd', async member => {
+        const message = "**HABBO MUSEUM**\n\nBienvenue, Welcome, Bienvenidos, Bem vindo! :wave:\n\n" +
+            ":flag_fr: Veuillez réagir avec la réaction dans le salon #rules pour obtenir le rôle :unicorn: — Membre.\n" +
+            "N'oubliez pas de choisir votre pays, votre serveur, vos talents, et les notifications que vous voulez recevoir.\n\n" +
+            ":flag_gb: Please react with the reaction in the channel #rules to get the role :unicorn: — Member.\n" +
+            "Don't forget to choose your country, your server, your talents, and notifications would you want to receive.\n\n" +
+            ":flag_pt: Por favor, reaja com a reação na sala #rules para obter a função :unicorn: — Membro.\n" +
+            "Não se esqueça de escolher o seu país, o seu servidor, os seus talentos e as notificações que deseja receber.\n\n" +
+            ":flag_es: Por favor, reaccione con la reacción en el salon #rules para conseguir la función :unicorn: — Miembro.\n" +
+            "No olvides elegir tu país, tu servidor, tus talentos y las notificaciones que quieres recibir."
+        await member.send(message)
+
+        const {guild} = member
+        const channel = guild.channels.cache.get(config.channelWelcome)
+
+        registerFont('./assets/LEMONMILK-Medium.otf', {family: 'Lemon'})
+        const canvas = createCanvas(800, 400)
+        const ctx = canvas.getContext('2d')
+
+        const background = await loadImage('./assets/banner.jpg')
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
+
+        ctx.strokeStyle = '#EEEADA'
+        ctx.strokeRect(0, 0, canvas.width, canvas.height)
+        ctx.save()
+        ctx.shadowColor = 'black'
+        ctx.shadowBlur = 8
+        ctx.shadowOffsetY = -2
+        ctx.fillStyle = '#ffffff'
+        ctx.font = '45px "Lemon"'
+        let text = 'WELCOME'
+        let x = canvas.width / 2 - ctx.measureText(text).width / 2
+        ctx.fillText(text, x, 310)
+        // Display member tag
+        ctx.font = '30px "Lemon"'
+        text = `${member.user.tag.toUpperCase()}`
+        x = canvas.width / 2 - ctx.measureText(text).width / 2
+        ctx.fillText(text, x, 340)
+        // Display member count
+        ctx.font = '20px "Lemon"'
+        text = `YOU ARE THE N°${guild.memberCount}...`
+        x = canvas.width / 2 - ctx.measureText(text).width / 2
+        ctx.fillText(text, x, 375)
+        ctx.restore()
+        ctx.beginPath()
+        ctx.arc(canvas.width / 2, 150, 100, 0, Math.PI * 2, true)
+        ctx.strokeStyle = '#fff'
+        ctx.fillStyle = '#fff'
+        ctx.lineWidth = 10
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.clip()
+        const avatar = await loadImage(member.user.displayAvatarURL({format: 'jpg'}))
+        ctx.drawImage(avatar, (canvas.width / 2 - avatar.width / 2) - 36, 50, 200, 200)
+
+        const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
+        channel.send('', attachment)
+    })
+}
 
 module.exports.createWelcomeMessage = (bot) => {
     let message = "🇫🇷  **__R È G L E M E N T__**\n\n" +
@@ -56,4 +120,16 @@ module.exports.createWelcomeMessage = (bot) => {
             if (err) return null
         })
     })
+}
+
+module.exports.setWelcomeChannel = async channel => {
+    config.channelWelcome = channel.id
+    fs.writeFile(fileName, JSON.stringify(config), function writeJSON(err) {
+        if (err) return null
+    })
+    await channel.send('<:valide:823910319092531201> The welcome channel has been defined here!').then((msg) => msg.delete({timeout: 3000}))
+}
+
+module.exports.simJoin = async (bot, message) => {
+    bot.emit('guildMemberAdd', message.member)
 }

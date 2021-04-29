@@ -5,7 +5,7 @@ const moment = require('moment')
 module.exports = (bot) => {
     moment.locale('fr')
     bot.on('messageDelete', async (messageDeleted) => {
-        if (!messageDeleted.guild || messageDeleted.author.bot) return
+        if (!messageDeleted.guild || !messageDeleted.author) return
         let date = moment().utcOffset(120).calendar()
         let deleteEmbed = new MessageEmbed()
             .setTitle('**MESSAGE SUPPRIMÉ**')
@@ -19,7 +19,7 @@ module.exports = (bot) => {
     })
 
     bot.on('messageUpdate', async (oldMessage, messageUpdate) => {
-        if (!messageUpdate.guild || messageUpdate.author.bot) return
+        if (!messageUpdate.guild || !messageUpdate.author) return
         let date = moment().utcOffset(120).calendar()
         let updateEmbed = new MessageEmbed()
             .setTitle('**MESSAGE MIS À JOUR**')
