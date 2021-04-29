@@ -27,7 +27,7 @@ module.exports.addPoints = async (message) => {
         search.points = search.points + 1
         if (search.level >= 10) {
             search.points += 1
-            if (search.points % 500 === 0) {
+            if (search.points % 750 === 0) {
                 search.level += 1
                 await channel.send(createEmbed(user, search.level, '✨', 'https://i.ibb.co/KqNwXC9/tenor-11.gif'))
             }
@@ -70,17 +70,17 @@ module.exports.addPoints = async (message) => {
                     search.level += 1
                     await channel.send(createEmbed(user, search.level, '🥳', 'https://i.ibb.co/XCNdjcX/tenor-10.gif'))
                     break;
-                case 1500:
+                case 1750:
                     // LEVEL 8
                     search.level += 1
                     await channel.send(createEmbed(user, search.level, '🥰', 'https://i.ibb.co/mRNk2Ct/tenor-7.gif'))
                     break;
-                case 2000:
+                case 2250:
                     // LEVEL 9
                     search.level += 1
                     await channel.send(createEmbed(user, search.level, '😈', 'https://i.ibb.co/ZHsbKTr/tenor-8.gif'))
                     break;
-                case 2500:
+                case 3000:
                     // LEVEL 10
                     search.level += 1
                     // Role VIP
