@@ -54,7 +54,7 @@ bot.on('message', async message => {
                     .setColor('#EEEADA')
                     .addField('**>social**', 'Show our social networks')
                     .addField('**>top**', 'Show top levels')
-                    .addField('**>rank**', 'Get your rank')
+                    .addField('**>rank [@user]**', 'Get rank (user is optional)')
                 if (message.member.hasPermission('MANAGE_MESSAGES')) {
                     embed.addField('**>delete [number]**', 'Delete [number] messages')
                 }
