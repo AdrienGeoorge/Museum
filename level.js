@@ -7,7 +7,7 @@ const createEmbed = (user, level, emoji, url, message = null) => {
     let embed = new MessageEmbed()
         .setTitle('**LEVEL UP**')
         .setImage(url)
-        .setDescription('**Oh great!**\nCongratulations ' + user.toString() + ', you up to level ' + level + ' ' + emoji)
+        .setDescription(`**Oh great!**\nCongratulations ${user.toString()}, you up to level ${level} ${emoji}`)
         .setColor('#EEEADA')
     if (message) {
         embed.addField('Reward', message)
@@ -117,9 +117,35 @@ module.exports.getTopLevels = async (bot, channel) => {
     for (let i = 0; i < 10; i++) {
         if (sort[i]) {
             user = await bot.users.fetch(sort[i].id)
-            top += '**' + (i + 1) + '.** ' + user.username + '#' + user.discriminator + ' with **' + sort[i].points + ' points**.\n'
+            top += `**${(i + 1)}.** ${user.username}#${user.discriminator} with **${sort[i].points} points**.\n`
         }
     }
 
     channel.send(embed.addField('**Ranking**', top))
+}
+
+module.exports.getRank = async (message) => {
+    let channel = message.channel
+    let user
+    if (message.mentions.users.first()) {
+        user = message.mentions.users.first()
+    } else {
+        user = message.author
+    }
+
+    const sort = db.points.sort((a, b) => (a.points < b.points) ? 1 : ((b.points < a.points) ? -1 : 0))
+    const finding = sort.find(data => data.id === user.id)
+
+    let embed = new MessageEmbed()
+        .setTitle(`** ${user.username} **`)
+        .setColor('#A76C22')
+
+    if (finding) {
+        const index = sort.indexOf(finding) + 1
+        embed.setDescription(`It is ranked number **${index}**\nOn level **${finding.level}** with **${finding.points}** points`)
+    } else {
+        embed.setDescription('Not classified: no points received yet')
+    }
+
+    channel.send(embed)
 }

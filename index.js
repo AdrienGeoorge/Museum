@@ -5,7 +5,7 @@ const bot = new Client({
 const config = require('./config.json')
 const messageReaction = require('./messageReaction.js')
 const messageLogs = require('./messageLogs.js')
-const {addPoints, getTopLevels} = require('./level.js')
+const {addPoints, getTopLevels, getRank} = require('./level.js')
 
 const {
     createCountriesEmbed,
@@ -54,6 +54,7 @@ bot.on('message', async message => {
                     .setColor('#EEEADA')
                     .addField('**>social**', 'Show our social networks')
                     .addField('**>top**', 'Show top levels')
+                    .addField('**>rank**', 'Get your rank')
                 if (message.member.hasPermission('MANAGE_MESSAGES')) {
                     embed.addField('**>delete [number]**', 'Delete [number] messages')
                 }
@@ -85,6 +86,11 @@ bot.on('message', async message => {
             if (command === 'top') {
                 await message.delete()
                 await getTopLevels(bot, message.channel)
+            }
+
+            if (command === 'rank') {
+                await message.delete()
+                await getRank(message)
             }
 
             // Rôle partner requis
