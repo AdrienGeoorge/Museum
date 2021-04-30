@@ -63,8 +63,8 @@ module.exports = client => {
         ctx.stroke()
         ctx.closePath()
         ctx.clip()
-        const avatar = await loadImage(member.user.displayAvatarURL({format: 'jpg'}))
-        ctx.drawImage(avatar, (canvas.width / 2 - avatar.width / 2) - 36, 50, 200, 200)
+        const avatar = await loadImage(member.user.displayAvatarURL({format: 'png', size: 2048, dynamic: true}))
+        ctx.drawImage(avatar, (canvas.width / 2 - avatar.width / 2) + 27.8, 50, 200, 200)
 
         const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
         channel.send('', attachment)
