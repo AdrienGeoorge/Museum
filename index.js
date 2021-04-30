@@ -82,8 +82,8 @@ bot.on('message', async message => {
             }
 
             // Rôle partner requis
-            if (message.member.roles.cache.get('826908398653800508')) {
-                // Discord messages
+            if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
+                // Delete messages
                 if (command === 'discord') {
                     await message.delete()
                     let response = `✨┇ Discover ${args[0].toString()} on <@&829832855865524325> ┇\n\n`
@@ -165,18 +165,6 @@ bot.on('message', async message => {
                     }
 
                     bot.channels.cache.get(config.channelStars).send(response)
-                }
-
-                // Discord messages
-                if (command === 'discord') {
-                    await message.delete()
-                    let response = `✨┇ Discover ${args[0].toString()} on <@&829832855865524325> ┇\n\n`
-                    response += '<:discord:823910071103914004> Join our partner\'s community : ' + args[1]
-                    if (args[2]) {
-                        await bot.channels.cache.get(config.channelDiscord).send(response, {files: [args[2]]})
-                    } else {
-                        await bot.channels.cache.get(config.channelDiscord).send(response)
-                    }
                 }
 
                 // Simulate a join
