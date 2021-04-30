@@ -71,21 +71,23 @@ bot.on('message', async message => {
                 await message.channel.send(response)
             }
 
+            // Get leaderboard
             if (command === 'top') {
                 await message.delete()
                 await getTopLevels(bot, message.channel)
             }
 
+            // Get rank
             if (command === 'rank') {
                 await message.delete()
                 await getRank(message)
             }
 
-            // Rôle partner requis
-            if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
-                // Delete messages
-                if (command === 'discord') {
-                    await message.delete()
+            // Discord message
+            if (command === 'discord') {
+                await message.delete()
+                // Rôle partner ou staff requis
+                if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
                     let response = `✨┇ Discover ${args[0].toString()} on <@&829832855865524325> ┇\n\n`
                     response += '<:discord:823910071103914004> Join our partner\'s community : ' + args[1]
                     if (args[2]) {
@@ -93,17 +95,16 @@ bot.on('message', async message => {
                     } else {
                         await bot.channels.cache.get(config.channelDiscord).send(response)
                     }
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
-            } else {
-                message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
             }
 
-            // Rôle staff requis
-            if (message.member.roles.cache.get('823665644989710416')) {
-                // Publish update for social networks
-                if (command === 'publish') {
-                    await message.delete()
-
+            // Publish update for social networks
+            if (command === 'publish') {
+                await message.delete()
+                // Rôle staff requis
+                if (message.member.roles.cache.get('823665644989710416')) {
                     if (args.length > 0) {
                         let response = '<:important:823909697857912923>┇ NEW POST ON OUR SOCIAL NETWORKS\n\n'
                         response += '<:important:823909697857912923>┇ <@&823916492470747156>\n\n'
@@ -127,11 +128,16 @@ bot.on('message', async message => {
                     } else {
                         message.channel.send('<:refuse:823910204613722142> You must fill in the links of the publications!').then((msg) => msg.delete({timeout: 3000}))
                     }
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Delete messages
-                if (command === 'delete') {
-                    await message.delete()
+            // Delete messages
+            if (command === 'delete') {
+                await message.delete()
+                // Rôle staff requis
+                if (message.member.roles.cache.get('823665644989710416')) {
                     !message.member.hasPermission('MANAGE_MESSAGES') && message.channel.send('<:refuse:823910204613722142> You don\'t have permission...').then((msg) => msg.delete({timeout: 3000}))
                     if (args[0] !== undefined) {
                         if (args[0] <= 100) {
@@ -143,13 +149,17 @@ bot.on('message', async message => {
                     } else {
                         message.channel.send('<:refuse:823910204613722142> You must specify a number of messages to delete!').then((msg) => msg.delete({timeout: 3000}))
                     }
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Star message
-                if (command === 'star') {
-                    await message.delete()
+            // Star message
+            if (command === 'star') {
+                await message.delete()
+                // Rôle staff requis
+                if (message.member.roles.cache.get('823665644989710416')) {
                     let response = `✨┇ Discover ${args[0].toString()} on social networks ┇ <@&823707326967709747>\n\n`
-
                     for (let i = 1; i < args.length; i++) {
                         if (args[i].includes('instagram')) {
                             response += '⭐ <@&829832854484680704> : ' + args[i] + '\n'
@@ -165,68 +175,109 @@ bot.on('message', async message => {
                     }
 
                     bot.channels.cache.get(config.channelStars).send(response)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Simulate a join
-                if (command === 'simjoin') {
+            // Simulate a join
+            if (command === 'simjoin') {
+                // Rôle staff requis
+                if (message.member.roles.cache.get('823665644989710416')) {
                     await message.delete()
                     await simJoin(bot, message)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
-            } else {
-                message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
             }
 
             // Rôle queen requis
-            if (message.member.roles.cache.get('823293841288200252')) {
-                // Create countries embed
-                if (command === 'rolecountries') {
+            // Create countries embed
+            if (command === 'rolecountries') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     createCountriesEmbed(bot)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Create talents embed
-                if (command === 'roletalents') {
+            // Create talents embed
+            if (command === 'roletalents') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     createTalentsEmbed(bot)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Create servers embed
-                if (command === 'roleservers') {
+            // Create servers embed
+            if (command === 'roleservers') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     createServersEmbed(bot)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Create servers embed
-                if (command === 'rolenotifications') {
+            // Create servers embed
+            if (command === 'rolenotifications') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     createNotificationsEmbed(bot)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Welcome message
-                if (command === 'welcomemessage') {
+            // Welcome message
+            if (command === 'welcomemessage') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     createWelcomeMessage(bot)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Add role to embed
-                if (command === 'addrole') {
+            // Add role to embed
+            if (command === 'addrole') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     await addRole(bot, message, args)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Remove role to embed
-                if (command === 'deleterole') {
+            // Remove role to embed
+            if (command === 'deleterole') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     await deleteRole(bot, message, args)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
+            }
 
-                // Set welcome channel
-                if (command === 'setwelcome') {
+            // Set welcome channel
+            if (command === 'setwelcome') {
+                // Rôle queen requis
+                if (message.member.roles.cache.get('823293841288200252')) {
                     await message.delete()
                     await setWelcomeChannel(message.channel)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
-            } else {
-                message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
             }
         }
     }
