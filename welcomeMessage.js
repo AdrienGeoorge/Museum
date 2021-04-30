@@ -15,8 +15,11 @@ module.exports = client => {
             "Não se esqueça de escolher o seu país, o seu servidor, os seus talentos e as notificações que deseja receber.\n\n" +
             ":flag_es: Por favor, reaccione con la reacción en el salon #rules para conseguir la función :unicorn: — Miembro.\n" +
             "No olvides elegir tu país, tu servidor, tus talentos y las notificaciones que quieres recibir."
-        await member.send(message).then(() => {
-            console.log('send')
+
+        member.send(message).then(() => {
+            console.log('Send a MP')
+        }).catch(() => {
+            console.log('Can\'t send a MP')
         })
 
         const {guild} = member
