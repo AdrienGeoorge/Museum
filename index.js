@@ -145,7 +145,7 @@ bot.on('message', async message => {
                     }
                 }
 
-                // Delete messages
+                // Star message
                 if (command === 'star') {
                     await message.delete()
                     let response = `✨┇ Discover ${args[0].toString()} on social networks ┇ <@&823707326967709747>\n\n`
@@ -165,6 +165,12 @@ bot.on('message', async message => {
                     }
 
                     bot.channels.cache.get(config.channelStars).send(response)
+                }
+
+                // Simulate a join
+                if (command === 'simjoin') {
+                    await message.delete()
+                    await simJoin(bot, message)
                 }
             } else {
                 message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
@@ -218,12 +224,6 @@ bot.on('message', async message => {
                 if (command === 'setwelcome') {
                     await message.delete()
                     await setWelcomeChannel(message.channel)
-                }
-
-                // Simulate a join
-                if (command === 'simjoin') {
-                    await message.delete()
-                    await simJoin(bot, message)
                 }
             } else {
                 message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
