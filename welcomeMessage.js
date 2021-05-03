@@ -42,19 +42,62 @@ module.exports = client => {
         ctx.font = '50px "Lemon"'
         let text = 'WELCOME'
         let x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
-        // ctx.fillText(text, x, 310)
         ctx.fillText(text, x, 190)
         // Display member tag
         ctx.font = '35px "Lemon"'
         text = `${member.user.tag.toUpperCase()}`
         x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
-        // ctx.fillText(text, x, 340)
         ctx.fillText(text, x, 225)
         // Display member count
         ctx.font = '25px "Lemon"'
         text = `YOU ARE THE N°${guild.memberCount}...`
         x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
-        // ctx.fillText(text, x, 375)
+        ctx.fillText(text, x, 260)
+        ctx.restore()
+        ctx.beginPath()
+        ctx.arc(175, 200, 100, 0, Math.PI * 2, true)
+        ctx.strokeStyle = '#fff'
+        ctx.fillStyle = '#fff'
+        ctx.lineWidth = 10
+        ctx.fill()
+        ctx.stroke()
+        ctx.closePath()
+        ctx.clip()
+        const avatar = await loadImage(member.user.displayAvatarURL({format: 'png', size: 2048, dynamic: true}))
+        ctx.drawImage(avatar, 75, 100, 200, 200)
+
+        const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
+        channel.send('', attachment)
+    })
+    client.on('guildMemberRemove', async member => {
+        const {guild} = member
+        const channel = guild.channels.cache.get(config.channelWelcome)
+
+        registerFont('./assets/LEMONMILK-Medium.otf', {family: 'Lemon'})
+        const canvas = createCanvas(800, 400)
+        const ctx = canvas.getContext('2d')
+
+        const background = await loadImage('./assets/welcomeBanner.png')
+        ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
+
+        ctx.strokeStyle = '#EEEADA'
+        ctx.strokeRect(0, 0, canvas.width, canvas.height)
+        ctx.save()
+        ctx.shadowColor = 'black'
+        ctx.shadowBlur = 8
+        ctx.shadowOffsetY = -2
+        ctx.fillStyle = '#ffffff'
+        ctx.font = '50px "Lemon"'
+        let text = 'GOODBYE'
+        let x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+        ctx.fillText(text, x, 190)
+        ctx.font = '35px "Lemon"'
+        text = `${member.user.tag.toUpperCase()}`
+        x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+        ctx.fillText(text, x, 225)
+        ctx.font = '25px "Lemon"'
+        text = 'WE ARE SAD TO SEE YOU LEAVE...'
+        x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
         ctx.fillText(text, x, 260)
         ctx.restore()
         ctx.beginPath()
@@ -140,4 +183,8 @@ module.exports.setWelcomeChannel = async channel => {
 
 module.exports.simJoin = async (bot, message) => {
     bot.emit('guildMemberAdd', message.member)
+}
+
+module.exports.simLeave = async (bot, message) => {
+    bot.emit('guildMemberRemove', message.member)
 }

@@ -6,7 +6,7 @@ const config = require('./config.json')
 const messageReaction = require('./messageReaction.js')
 const messageLogs = require('./messageLogs.js')
 const welcomeMessage = require('./welcomeMessage.js')
-const {createWelcomeMessage, setWelcomeChannel, simJoin} = require('./welcomeMessage')
+const {createWelcomeMessage, setWelcomeChannel, simJoin, simLeave} = require('./welcomeMessage')
 const {addPoints, getTopLevels, getRank} = require('./level.js')
 
 const {
@@ -186,6 +186,17 @@ bot.on('message', async message => {
                 if (message.member.roles.cache.get('823665644989710416')) {
                     await message.delete()
                     await simJoin(bot, message)
+                } else {
+                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
+                }
+            }
+
+            // Simulate a leave
+            if (command === 'simleave') {
+                // Rôle staff requis
+                if (message.member.roles.cache.get('823665644989710416')) {
+                    await message.delete()
+                    await simLeave(bot, message)
                 } else {
                     message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
                 }
