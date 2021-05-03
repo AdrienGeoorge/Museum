@@ -17,9 +17,9 @@ module.exports = client => {
             "No olvides elegir tu país, tu servidor, tus talentos y las notificaciones que quieres recibir."
 
         member.send(message).then(() => {
-            console.log('Send a MP')
+            console.log('New member - Send a MP')
         }).catch(() => {
-            console.log('Can\'t send a MP')
+            console.log('New member - Can\'t send a MP')
         })
 
         const {guild} = member
@@ -29,7 +29,7 @@ module.exports = client => {
         const canvas = createCanvas(800, 400)
         const ctx = canvas.getContext('2d')
 
-        const background = await loadImage('./assets/banner.jpg')
+        const background = await loadImage('./assets/welcomeBanner.png')
         ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
 
         ctx.strokeStyle = '#EEEADA'
@@ -39,23 +39,26 @@ module.exports = client => {
         ctx.shadowBlur = 8
         ctx.shadowOffsetY = -2
         ctx.fillStyle = '#ffffff'
-        ctx.font = '45px "Lemon"'
+        ctx.font = '50px "Lemon"'
         let text = 'WELCOME'
-        let x = canvas.width / 2 - ctx.measureText(text).width / 2
-        ctx.fillText(text, x, 310)
+        let x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+        // ctx.fillText(text, x, 310)
+        ctx.fillText(text, x, 190)
         // Display member tag
-        ctx.font = '30px "Lemon"'
+        ctx.font = '35px "Lemon"'
         text = `${member.user.tag.toUpperCase()}`
-        x = canvas.width / 2 - ctx.measureText(text).width / 2
-        ctx.fillText(text, x, 340)
+        x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+        // ctx.fillText(text, x, 340)
+        ctx.fillText(text, x, 225)
         // Display member count
-        ctx.font = '20px "Lemon"'
+        ctx.font = '25px "Lemon"'
         text = `YOU ARE THE N°${guild.memberCount}...`
-        x = canvas.width / 2 - ctx.measureText(text).width / 2
-        ctx.fillText(text, x, 375)
+        x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+        // ctx.fillText(text, x, 375)
+        ctx.fillText(text, x, 260)
         ctx.restore()
         ctx.beginPath()
-        ctx.arc(canvas.width / 2, 150, 100, 0, Math.PI * 2, true)
+        ctx.arc(175, 200, 100, 0, Math.PI * 2, true)
         ctx.strokeStyle = '#fff'
         ctx.fillStyle = '#fff'
         ctx.lineWidth = 10
@@ -64,7 +67,7 @@ module.exports = client => {
         ctx.closePath()
         ctx.clip()
         const avatar = await loadImage(member.user.displayAvatarURL({format: 'png', size: 2048, dynamic: true}))
-        ctx.drawImage(avatar, (canvas.width / 2 - avatar.width / 2) + 27.8, 50, 200, 200)
+        ctx.drawImage(avatar, 75, 100, 200, 200)
 
         const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
         channel.send('', attachment)
