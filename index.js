@@ -69,6 +69,7 @@ bot.on('guildMemberAdd', async member => {
 
     const {guild} = member
     const channel = guild.channels.cache.get(config.channelWelcome)
+    const channelMod = guild.channels.cache.get(config.channelWelcomeMod)
 
     registerFont('./assets/LEMONMILK-Medium.otf', {family: 'Lemon'})
     const canvas = createCanvas(800, 400)
@@ -113,10 +114,11 @@ bot.on('guildMemberAdd', async member => {
 
     const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
     channel.send('', attachment)
+    channelMod.send('', attachment)
 })
 bot.on('guildMemberRemove', async member => {
     const {guild} = member
-    const channel = guild.channels.cache.get(config.channelWelcome)
+    const channel = guild.channels.cache.get(config.channelGoodbye)
 
     registerFont('./assets/LEMONMILK-Medium.otf', {family: 'Lemon'})
     const canvas = createCanvas(800, 400)
