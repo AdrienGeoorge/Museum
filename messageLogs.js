@@ -28,7 +28,7 @@ module.exports = (bot) => {
             .setColor('#a554ec')
             .addField('Auteur', `${messageUpdate.author.tag}`, true)
             .addField('Channel', `${messageUpdate.channel}`, true)
-            .addField('Message précédent', `${oldMessage.content}`)
+            .addField('Message précédent', `${oldMessage.content} `)
             .addField('Nouveau message', `${messageUpdate.content} `)
             .setFooter('Modifié ' + date.toLowerCase())
 

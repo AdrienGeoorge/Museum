@@ -34,6 +34,7 @@ bot.on('message', async message => {
         const command = commandName.slice(config.prefix.length)
 
         if (message.guild) {
+            /******* NO ROLES REQUIRED *******/
             // Commands list
             if (command === 'commands') {
                 await message.delete()
@@ -83,6 +84,7 @@ bot.on('message', async message => {
                 await getRank(message)
             }
 
+            /******* ROLES REQUIRED *******/
             // Discord message
             if (command === 'discord') {
                 await message.delete()
@@ -136,8 +138,8 @@ bot.on('message', async message => {
             // Delete messages
             if (command === 'delete') {
                 await message.delete()
-                // Rôle staff requis
-                if (message.member.roles.cache.get('823665644989710416')) {
+                // Rôle staff ou modérateur requis
+                if (message.member.roles.cache.get('823665644989710416') || message.member.roles.cache.get('838813818904903730')) {
                     !message.member.hasPermission('MANAGE_MESSAGES') && message.channel.send('<:refuse:823910204613722142> You don\'t have permission...').then((msg) => msg.delete({timeout: 3000}))
                     if (args[0] !== undefined) {
                         if (args[0] <= 100) {
@@ -202,7 +204,7 @@ bot.on('message', async message => {
                 }
             }
 
-            // Rôle queen requis
+            /******* ROLE QUEEN *******/
             // Create countries embed
             if (command === 'rolecountries') {
                 // Rôle queen requis
