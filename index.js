@@ -4,6 +4,8 @@ const config = require('./config.json')
 const {Client, Collection, MessageAttachment, MessageEmbed} = require('discord.js')
 const {registerFont, createCanvas, loadImage} = require('canvas')
 const {addPoints} = require('./level.js')
+cooldown = new Set()
+
 const bot = new Client({
     fetchAllMembers: true,
     partials: ['MESSAGE', 'REACTION', 'CHANNEL']
@@ -29,7 +31,15 @@ bot.on('ready', () => {
 
 bot.on('message', async message => {
         if (message.type !== 'DEFAULT' || message.author.bot) return
-        await addPoints(message)
+
+        if (!cooldown.has(message.author.id)) {
+            await addPoints(message)
+        }
+        cooldown.add(message.author.id)
+        setTimeout(() => {
+            cooldown.delete(message.author.id)
+        }, 10000)
+
         const args = message.content.trim().split(/ +/)
         const commandName = args.shift().toLowerCase()
         if (!commandName.startsWith(config.prefix)) return
