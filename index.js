@@ -35,7 +35,7 @@ bot.on('message', async message => {
         if (!commandName.startsWith(config.prefix)) return
         const command = bot.commands.get(commandName.slice(config.prefix.length))
         if (!command) return
-        if (command.guildOnly && !message.guild) return message.channel.send('Cette commande ne peut être utilisée que dans un serveur.')
+        if (command.guildOnly && !message.guild) return message.channel.send('This command can only be used in a server.')
         command.run(message, args, bot)
     }
 )

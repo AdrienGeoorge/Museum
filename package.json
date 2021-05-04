@@ -19,5 +19,9 @@
     "node": "15.x",
     "npm": "*"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "humanize-duration": "^3.26.0",
+    "parse-duration": "^1.0.0"
+  }
 }

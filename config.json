@@ -7,6 +7,8 @@
   "channelDiscord": "835899606587932682",
   "logsChannel": "834590781775937536",
   "channelWelcome": "831207348243529748",
+  "logsModChannel": "838821589549187163",
+  "muteRole": "838811217056759889",
   "reactionRole": {
     "831680497528602624": {
       "removable": true,

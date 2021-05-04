@@ -9,5 +9,5 @@ module.exports = {
         await message.channel.send(response)
     },
     name: 'social',
-    guildOnly: true
+    guildOnly: false
 }
