@@ -1,4 +1,5 @@
 const config = require('../config.json')
+const {MessageEmbed} = require("discord.js");
 module.exports = {
     run: async (message, args, bot) => {
         await message.delete()
@@ -11,7 +12,10 @@ module.exports = {
             if (!member.manageable) return message.channel.send('<:refuse:823910204613722142> The bot can\'t unmute this member.').then((msg) => msg.delete({timeout: 3000}))
             await member.roles.remove(config.muteRole)
             await member.send('You have been unmute from the server.').catch(() => console.log('Can\'t send a MP'))
-            await bot.channels.cache.get(config.logsModChannel).send(`<:valide:823910319092531201> ${member.user.tag} has been unmute by ${message.author}.`)
+            const embed = new MessageEmbed()
+                .setTitle(`<:valide:823910319092531201> ${member.user.tag} has been unmute by ${message.author}`)
+                .setColor('#EEEADA')
+            await bot.channels.cache.get(config.logsModChannel).send(embed)
         } else {
             message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
         }

@@ -1,6 +1,7 @@
 const config = require('../config.json')
 const parseDuration = require('parse-duration')
 const humanizeDuration = require('humanize-duration')
+const {MessageEmbed} = require("discord.js");
 
 module.exports = {
     run: async (message, args, bot) => {
@@ -21,11 +22,18 @@ module.exports = {
             // Ban and send message
             await member.ban({reason})
             await member.send(`You have been banned from the server for ${humanizeDuration(duration)} for the reason: ${reason}`).catch(() => console.log('Can\'t send a MP'))
-            await bot.channels.cache.get(config.logsModChannel).send(`<:important:823909697857912923> ${member.user.tag} has been banned by ${message.author} for ${humanizeDuration(duration)} for the reason: ${reason}`)
+            const embed = new MessageEmbed()
+                .setTitle(`<:important:823909697857912923> ${member.user.tag} has been banned by ${message.author} for ${humanizeDuration(duration)}`)
+                .setDescription(reason)
+                .setColor('#EEEADA')
+            await bot.channels.cache.get(config.logsModChannel).send(embed)
             setTimeout(() => {
                 message.guild.members.unban(member)
                 member.send('You have been unban from the server.').catch(() => console.log('Can\'t send a MP'))
-                bot.channels.cache.get(config.logsModChannel).send(`<:valide:823910319092531201> ${member.user.tag} has been unban automatically.`)
+                const embed = new MessageEmbed()
+                    .setTitle(`<:valide:823910319092531201> ${member.user.tag} has been unban automatically.`)
+                    .setColor('#EEEADA')
+                bot.channels.cache.get(config.logsModChannel).send(embed)
             }, duration)
         } else {
             message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
