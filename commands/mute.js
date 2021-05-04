@@ -17,7 +17,7 @@ module.exports = {
             const rulesMessage = await message.guild.channels.cache.get(config.rules.channel).messages.fetch(config.rules.message)
             await rulesMessage.reactions.resolve(config.rules.name).users.remove(member)
             // Send message to user and logs channel
-            await member.send(`You have been muted from the server for the reason: ${reason}.\nPlease read the rules again to get the role **🦄 — Member**.`).catch(() => console.log('Can\'t send a MP'))
+            await member.send(`You have been muted from the server for the reason: ${reason}.\nPlease read the rules again to get the role **🦄 — Member**.`).then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP'))
             const embed = new MessageEmbed()
                 .setTitle(`<:important:823909697857912923> ${member.user.tag} has been muted by ${message.author}`)
                 .setDescription(reason)

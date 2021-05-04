@@ -21,7 +21,7 @@ module.exports = {
             await rulesMessage.reactions.resolve(config.rules.name).users.remove(member)
             // Ban and send message
             await member.ban({reason})
-            await member.send(`You have been banned from the server for ${humanizeDuration(duration)} for the reason: ${reason}`).catch(() => console.log('Can\'t send a MP'))
+            await member.send(`You have been banned from the server for ${humanizeDuration(duration)} for the reason: ${reason}`).then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP'))
             const embed = new MessageEmbed()
                 .setTitle(`<:important:823909697857912923> ${member.user.tag} has been banned by ${message.author} for ${humanizeDuration(duration)}`)
                 .setDescription(reason)
@@ -29,7 +29,7 @@ module.exports = {
             await bot.channels.cache.get(config.logsModChannel).send(embed)
             setTimeout(() => {
                 message.guild.members.unban(member)
-                member.send('You have been unban from the server.').catch(() => console.log('Can\'t send a MP'))
+                member.send('You have been unban from the server.').then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP'))
                 const embed = new MessageEmbed()
                     .setTitle(`<:valide:823910319092531201> ${member.user.tag} has been unban automatically.`)
                     .setColor('#EEEADA')
