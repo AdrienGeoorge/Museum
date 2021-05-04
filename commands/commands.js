@@ -42,6 +42,6 @@ module.exports = {
         }
         await message.channel.send(embed)
     },
-    name: 'commands2',
+    name: 'commands',
     guildOnly: false
 }
