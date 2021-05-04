@@ -1,25 +1,27 @@
-const {Client, MessageEmbed} = require('discord.js')
+fs = require('fs')
+const moment = require('moment')
+const config = require('./config.json')
+const {Client, Collection, MessageAttachment, MessageEmbed} = require('discord.js')
+const {registerFont, createCanvas, loadImage} = require('canvas')
+const {addPoints} = require('./level.js')
 const bot = new Client({
+    fetchAllMembers: true,
     partials: ['MESSAGE', 'REACTION', 'CHANNEL']
 })
-const config = require('./config.json')
-const messageReaction = require('./messageReaction.js')
-const messageLogs = require('./messageLogs.js')
-const welcomeMessage = require('./welcomeMessage.js')
-const {createWelcomeMessage, setWelcomeChannel, simJoin, simLeave} = require('./welcomeMessage')
-const {addPoints, getTopLevels, getRank} = require('./level.js')
 
-const {
-    createCountriesEmbed,
-    createTalentsEmbed,
-    createServersEmbed,
-    createNotificationsEmbed,
-    addRole,
-    deleteRole
-} = require('./messageReaction')
-
+moment.locale('fr')
 
 bot.login(config.token).then(() => console.log('Connexion du bot...'))
+bot.commands = new Collection()
+
+fs.readdir('./commands', (err, files) => {
+    if (err) throw err
+    files.forEach(file => {
+        if (!file.endsWith('.js')) return
+        const command = require(`./commands/${file}`)
+        bot.commands.set(command.name, command)
+    })
+})
 
 bot.on('ready', () => {
     console.log('Je suis connecté!')
@@ -31,271 +33,196 @@ bot.on('message', async message => {
         const args = message.content.trim().split(/ +/)
         const commandName = args.shift().toLowerCase()
         if (!commandName.startsWith(config.prefix)) return
-        const command = commandName.slice(config.prefix.length)
+        const command = bot.commands.get(commandName.slice(config.prefix.length))
+        if (!command) return
+        if (command.guildOnly && !message.guild) return message.channel.send('Cette commande ne peut être utilisée que dans un serveur.')
+        command.run(message, args, bot)
+    }
+)
 
-        if (message.guild) {
-            /******* NO ROLES REQUIRED *******/
-            // Commands list
-            if (command === 'commands') {
-                await message.delete()
-                const embed = new MessageEmbed()
-                    .setTitle('Liste des commandes')
-                    .setColor('#EEEADA')
-                    .addField('**>social**', 'Show our social networks')
-                    .addField('**>top**', 'Show top levels')
-                    .addField('**>rank [@user]**', 'Get rank (user is optional)')
-                if (message.member.hasPermission('MANAGE_MESSAGES')) {
-                    embed.addField('**>delete [number]**', 'Delete [number] messages')
-                }
-                if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
-                    embed.addField('**>discord [@roleServer] [lienDiscord] [lienLogo]**', 'Share a partner\'s Discord server')
-                }
-                if (message.member.roles.cache.get('823665644989710416')) {
-                    embed.addField('**>publish [links]**', 'Create an announcement indicating a publication on our social networks')
-                    embed.addField('**>star [@user] [links]**', 'Post a message in star channel with the social network\'s link')
-                }
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    embed.addField('**>addRole [countries/talents/servers/notifications] [label] [role] [emoji]**', 'Add a new role')
-                    embed.addField('**>deleteRole [countries/talents/servers/notifications] [role]**', 'Delete role')
-                }
-                await message.channel.send(embed)
-            }
+bot.on('guildMemberAdd', async member => {
+    const message = "**HABBO MUSEUM**\n\nBienvenue, Welcome, Bienvenidos, Bem vindo! :wave:\n\n" +
+        ":flag_fr: Veuillez réagir avec la réaction dans le salon #rules pour obtenir le rôle :unicorn: — Membre.\n" +
+        "N'oubliez pas de choisir votre pays, votre serveur, vos talents, et les notifications que vous voulez recevoir.\n\n" +
+        ":flag_gb: Please react with the reaction in the channel #rules to get the role :unicorn: — Member.\n" +
+        "Don't forget to choose your country, your server, your talents, and notifications would you want to receive.\n\n" +
+        ":flag_pt: Por favor, reaja com a reação na sala #rules para obter a função :unicorn: — Membro.\n" +
+        "Não se esqueça de escolher o seu país, o seu servidor, os seus talentos e as notificações que deseja receber.\n\n" +
+        ":flag_es: Por favor, reaccione con la reacción en el salon #rules para conseguir la función :unicorn: — Miembro.\n" +
+        "No olvides elegir tu país, tu servidor, tus talentos y las notificaciones que quieres recibir."
 
-            // Social networks list
-            if (command === 'social') {
-                await message.delete()
-                let response = 'Hi ' + message.author.toString() + ', these are our social networks:\n'
-                response += '<:insta:823909790370758698>┇ Instagram: https://www.instagram.com/habbomuseum\n'
-                response += '<:fb:826046421014806539>┇ Facebook : https://www.facebook.com/habbomuseum\n'
-                response += '<:twitter:823909833022373919>┇ Twitter : https://twitter.com/habbomuseum\n'
-                response += '<:discord:823910071103914004>┇ Discord : https://discord.gg/wsgwKV3Y7C\n'
-                await message.channel.send(response)
-            }
+    member.send(message).then(() => {
+        console.log('New member - Send a MP')
+    }).catch(() => {
+        console.log('New member - Can\'t send a MP')
+    })
 
-            // Get leaderboard
-            if (command === 'top') {
-                await message.delete()
-                await getTopLevels(bot, message.channel)
-            }
+    const {guild} = member
+    const channel = guild.channels.cache.get(config.channelWelcome)
 
-            // Get rank
-            if (command === 'rank') {
-                await message.delete()
-                await getRank(message)
-            }
+    registerFont('./assets/LEMONMILK-Medium.otf', {family: 'Lemon'})
+    const canvas = createCanvas(800, 400)
+    const ctx = canvas.getContext('2d')
 
-            /******* ROLES REQUIRED *******/
-            // Discord message
-            if (command === 'discord') {
-                await message.delete()
-                // Rôle partner ou staff requis
-                if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
-                    let response = `✨┇ Discover ${args[0].toString()} on <@&829832855865524325> ┇\n\n`
-                    response += '<:discord:823910071103914004> Join our partner\'s community : ' + args[1]
-                    if (args[2]) {
-                        await bot.channels.cache.get(config.channelDiscord).send(response, {files: [args[2]]})
-                    } else {
-                        await bot.channels.cache.get(config.channelDiscord).send(response)
-                    }
+    const background = await loadImage('./assets/welcomeBanner.png')
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
+
+    ctx.strokeStyle = '#EEEADA'
+    ctx.strokeRect(0, 0, canvas.width, canvas.height)
+    ctx.save()
+    ctx.shadowColor = 'black'
+    ctx.shadowBlur = 8
+    ctx.shadowOffsetY = -2
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '50px "Lemon"'
+    let text = 'WELCOME'
+    let x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+    ctx.fillText(text, x, 190)
+    // Display member tag
+    ctx.font = '35px "Lemon"'
+    text = `${member.user.tag.toUpperCase()}`
+    x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+    ctx.fillText(text, x, 225)
+    // Display member count
+    ctx.font = '25px "Lemon"'
+    text = `YOU ARE THE N°${guild.memberCount}...`
+    x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+    ctx.fillText(text, x, 260)
+    ctx.restore()
+    ctx.beginPath()
+    ctx.arc(175, 200, 100, 0, Math.PI * 2, true)
+    ctx.strokeStyle = '#fff'
+    ctx.fillStyle = '#fff'
+    ctx.lineWidth = 10
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+    ctx.clip()
+    const avatar = await loadImage(member.user.displayAvatarURL({format: 'png', size: 2048, dynamic: true}))
+    ctx.drawImage(avatar, 75, 100, 200, 200)
+
+    const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
+    channel.send('', attachment)
+})
+bot.on('guildMemberRemove', async member => {
+    const {guild} = member
+    const channel = guild.channels.cache.get(config.channelWelcome)
+
+    registerFont('./assets/LEMONMILK-Medium.otf', {family: 'Lemon'})
+    const canvas = createCanvas(800, 400)
+    const ctx = canvas.getContext('2d')
+
+    const background = await loadImage('./assets/welcomeBanner.png')
+    ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
+
+    ctx.strokeStyle = '#EEEADA'
+    ctx.strokeRect(0, 0, canvas.width, canvas.height)
+    ctx.save()
+    ctx.shadowColor = 'black'
+    ctx.shadowBlur = 8
+    ctx.shadowOffsetY = -2
+    ctx.fillStyle = '#ffffff'
+    ctx.font = '50px "Lemon"'
+    let text = 'GOODBYE'
+    let x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+    ctx.fillText(text, x, 190)
+    ctx.font = '35px "Lemon"'
+    text = `${member.user.tag.toUpperCase()}`
+    x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+    ctx.fillText(text, x, 225)
+    ctx.font = '25px "Lemon"'
+    text = 'WE ARE SAD TO SEE YOU LEAVE...'
+    x = (canvas.width / 2 - ctx.measureText(text).width / 2) + 155
+    ctx.fillText(text, x, 260)
+    ctx.restore()
+    ctx.beginPath()
+    ctx.arc(175, 200, 100, 0, Math.PI * 2, true)
+    ctx.strokeStyle = '#fff'
+    ctx.fillStyle = '#fff'
+    ctx.lineWidth = 10
+    ctx.fill()
+    ctx.stroke()
+    ctx.closePath()
+    ctx.clip()
+    const avatar = await loadImage(member.user.displayAvatarURL({format: 'png', size: 2048, dynamic: true}))
+    ctx.drawImage(avatar, 75, 100, 200, 200)
+
+    const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
+    channel.send('', attachment)
+})
+
+bot.on('messageReactionAdd', async (reaction, user) => {
+        if (!reaction.message.guild || user.bot) return
+        if (reaction.message.id !== config.rules.message) {
+            const reactionRoleElem = config.reactionRole[reaction.message.id]
+            if (!reactionRoleElem) return
+            const prop = reaction.emoji.id ? 'id' : 'name'
+            const emoji = reactionRoleElem.emojis.find(emoji => {
+                if (emoji.name.includes('<:')) {
+                    return emoji.name.replace('>', '').split(':')[2] === reaction.emoji[prop]
                 } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
+                    return emoji.name === reaction.emoji[prop]
                 }
+            })
+            if (emoji) {
+                await reaction.message.guild.member(user).roles.add(emoji.roles)
+            } else {
+                await reaction.users.remove(user)
             }
-
-            // Publish update for social networks
-            if (command === 'publish') {
-                await message.delete()
-                // Rôle staff requis
-                if (message.member.roles.cache.get('823665644989710416')) {
-                    if (args.length > 0) {
-                        let response = '<:important:823909697857912923>┇ NEW POST ON OUR SOCIAL NETWORKS\n\n'
-                        response += '<:important:823909697857912923>┇ <@&823916492470747156>\n\n'
-                        response += ':unicorn:┇ A new post has appeared on our social networks.\n'
-                        response += ':speech_balloon:┇ We invite you to leave a little like, comment and share.\n\n'
-                        response += '*Do not hesitate to send us your creations in the dedicated channels.*\n\n'
-
-                        for (let i = 0; i < args.length; i++) {
-                            if (args[i].includes('instagram')) {
-                                response += '<:insta:823909790370758698>┇ Instagram : ' + args[i] + '\n'
-                            } else if (args[i].includes('facebook')) {
-                                response += '<:fb:826046421014806539>┇ Facebook : ' + args[i] + '\n'
-                            } else if (args[i].includes('twitter')) {
-                                response += '<:twitter:823909833022373919>┇ Twitter : ' + args[i] + '\n'
-                            }
-                        }
-
-                        response += '\n<:discord:823910071103914004>┇ Our discord server : https://discord.gg/wsgwKV3Y7C\n\n - ' + message.author.toString()
-
-                        bot.channels.cache.get(config.channelSocial).send(response)
-                    } else {
-                        message.channel.send('<:refuse:823910204613722142> You must fill in the links of the publications!').then((msg) => msg.delete({timeout: 3000}))
-                    }
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Delete messages
-            if (command === 'delete') {
-                await message.delete()
-                // Rôle staff ou modérateur requis
-                if (message.member.roles.cache.get('823665644989710416') || message.member.roles.cache.get('838813818904903730')) {
-                    !message.member.hasPermission('MANAGE_MESSAGES') && message.channel.send('<:refuse:823910204613722142> You don\'t have permission...').then((msg) => msg.delete({timeout: 3000}))
-                    if (args[0] !== undefined) {
-                        if (args[0] <= 100) {
-                            message.channel.bulkDelete(parseInt(args[0]))
-                            message.channel.send(`<:valide:823910319092531201> At your service! I have deleted ${args[0]} message(s)!`).then((msg) => msg.delete({timeout: 3000}))
-                        } else {
-                            message.channel.send('<:refuse:823910204613722142> I cannot delete more than 100 posts at a time and older than 14 days.').then((msg) => msg.delete({timeout: 3000}))
-                        }
-                    } else {
-                        message.channel.send('<:refuse:823910204613722142> You must specify a number of messages to delete!').then((msg) => msg.delete({timeout: 3000}))
-                    }
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Star message
-            if (command === 'star') {
-                await message.delete()
-                // Rôle staff requis
-                if (message.member.roles.cache.get('823665644989710416')) {
-                    let response = `✨┇ Discover ${args[0].toString()} on social networks ┇ <@&823707326967709747>\n\n`
-                    for (let i = 1; i < args.length; i++) {
-                        if (args[i].includes('instagram')) {
-                            response += '⭐ <@&829832854484680704> : ' + args[i] + '\n'
-                        } else if (args[i].includes('facebook')) {
-                            response += '⭐ <@&829832853755527168> : ' + args[i] + '\n'
-                        } else if (args[i].includes('twitter')) {
-                            response += '⭐ <@&829832854846308423> : ' + args[i] + '\n'
-                        } else if (args[i].includes('youtu')) {
-                            response += '⭐ <@&834473195184193537> : ' + args[i] + '\n'
-                        } else {
-                            response += '⭐ ' + args[i] + '\n'
-                        }
-                    }
-
-                    bot.channels.cache.get(config.channelStars).send(response)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Simulate a join
-            if (command === 'simjoin') {
-                // Rôle staff requis
-                if (message.member.roles.cache.get('823665644989710416')) {
-                    await message.delete()
-                    await simJoin(bot, message)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Simulate a leave
-            if (command === 'simleave') {
-                // Rôle staff requis
-                if (message.member.roles.cache.get('823665644989710416')) {
-                    await message.delete()
-                    await simLeave(bot, message)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            /******* ROLE QUEEN *******/
-            // Create countries embed
-            if (command === 'rolecountries') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    createCountriesEmbed(bot)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Create talents embed
-            if (command === 'roletalents') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    createTalentsEmbed(bot)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Create servers embed
-            if (command === 'roleservers') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    createServersEmbed(bot)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Create servers embed
-            if (command === 'rolenotifications') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    createNotificationsEmbed(bot)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Welcome message
-            if (command === 'welcomemessage') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    createWelcomeMessage(bot)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Add role to embed
-            if (command === 'addrole') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    await addRole(bot, message, args)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Remove role to embed
-            if (command === 'deleterole') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    await deleteRole(bot, message, args)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
-            }
-
-            // Set welcome channel
-            if (command === 'setwelcome') {
-                // Rôle queen requis
-                if (message.member.roles.cache.get('823293841288200252')) {
-                    await message.delete()
-                    await setWelcomeChannel(message.channel)
-                } else {
-                    message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
-                }
+        } else {
+            if (reaction.emoji.id === config.rules.name) {
+                await reaction.message.guild.member(user).roles.add(config.rules.roles)
             }
         }
     }
 )
+bot.on('messageReactionRemove', async (reaction, user) => {
+    if (!reaction.message.guild || user.bot) return
+    if (reaction.message.id !== config.rules.message) {
+        const reactionRoleElem = config.reactionRole[reaction.message.id]
+        if (!reactionRoleElem || !reactionRoleElem.removable) return
+        const prop = reaction.emoji.id ? 'id' : 'name'
+        const emoji = reactionRoleElem.emojis.find(emoji => {
+            if (emoji.name.includes('<:')) {
+                return emoji.name.replace('>', '').split(':')[2] === reaction.emoji[prop]
+            } else {
+                return emoji.name === reaction.emoji[prop]
+            }
+        })
+        if (emoji) await reaction.message.guild.member(user).roles.remove(emoji.roles)
+    } else {
+        if (reaction.emoji.id === config.rules.name) {
+            await reaction.message.guild.member(user).roles.remove(config.rules.roles)
+        }
+    }
+})
 
-messageReaction(bot)
-messageLogs(bot)
-welcomeMessage(bot)
+bot.on('messageDelete', async (messageDeleted) => {
+    if (!messageDeleted.guild || !messageDeleted.author) return
+    if (messageDeleted.author.bot) return
+    let date = moment().utcOffset(120).calendar()
+    let deleteEmbed = new MessageEmbed()
+        .setTitle('**MESSAGE SUPPRIMÉ**')
+        .setColor('#fc3c3c')
+        .addField('Auteur', `${messageDeleted.author.tag}`, true)
+        .addField('Channel', `${messageDeleted.channel}`, true)
+        .addField('Message', `${messageDeleted.content} `)
+        .setFooter('Supprimé ' + date.toLowerCase())
+
+    bot.channels.cache.get(config.logsChannel).send(deleteEmbed)
+})
+bot.on('messageUpdate', async (oldMessage, messageUpdate) => {
+    if (!messageUpdate.guild || !messageUpdate.author) return
+    if (messageUpdate.author.bot) return
+    let date = moment().utcOffset(120).calendar()
+    let updateEmbed = new MessageEmbed()
+        .setTitle('**MESSAGE MIS À JOUR**')
+        .setColor('#a554ec')
+        .addField('Auteur', `${messageUpdate.author.tag}`, true)
+        .addField('Channel', `${messageUpdate.channel}`, true)
+        .addField('Message précédent', `${oldMessage.content} `)
+        .addField('Nouveau message', `${messageUpdate.content} `)
+        .setFooter('Modifié ' + date.toLowerCase())
+
+    bot.channels.cache.get(config.logsChannel).send(updateEmbed)
+})
