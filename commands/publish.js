@@ -1,6 +1,6 @@
 const config = require('../config.json')
 module.exports = {
-    run: async (message, args) => {
+    run: async (message, args, bot) => {
         await message.delete()
         if (message.member.roles.cache.get('823665644989710416')) {
             if (args.length > 0) {
