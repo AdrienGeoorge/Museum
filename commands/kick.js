@@ -15,7 +15,7 @@ module.exports = {
             await rulesMessage.reactions.resolve(config.rules.name).users.remove(member)
             // Kick and send message
             await member.kick(reason)
-            await member.send(`You have been kicked from the server for the reason: ${reason}`)
+            await member.send(`You have been kicked from the server for the reason: ${reason}`).catch(() => console.log('Can\'t send a MP'))
             await bot.channels.cache.get(config.logsModChannel).send(`<:important:823909697857912923> ${member.user.tag} has been kicked by ${message.author} for the reason: ${reason}`)
         } else {
             message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))

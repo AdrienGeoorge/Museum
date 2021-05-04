@@ -10,7 +10,7 @@ module.exports = {
             if (message.member.roles.highest.comparePositionTo(member.roles.highest) < 1 && message.author.id !== message.guild.ownerID) return message.channel.send('<:refuse:823910204613722142> You can\'t unmute this member.').then((msg) => msg.delete({timeout: 3000}))
             if (!member.manageable) return message.channel.send('<:refuse:823910204613722142> The bot can\'t unmute this member.').then((msg) => msg.delete({timeout: 3000}))
             await member.roles.remove(config.muteRole)
-            await member.send('You have been unmute from the server.')
+            await member.send('You have been unmute from the server.').catch(() => console.log('Can\'t send a MP'))
             await bot.channels.cache.get(config.logsModChannel).send(`<:valide:823910319092531201> ${member.user.tag} has been unmute by ${message.author}.`)
         } else {
             message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))

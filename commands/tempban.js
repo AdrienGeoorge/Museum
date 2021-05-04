@@ -20,11 +20,11 @@ module.exports = {
             await rulesMessage.reactions.resolve(config.rules.name).users.remove(member)
             // Ban and send message
             await member.ban({reason})
-            await member.send(`You have been banned from the server for ${humanizeDuration(duration)} for the reason: ${reason}`)
+            await member.send(`You have been banned from the server for ${humanizeDuration(duration)} for the reason: ${reason}`).catch(() => console.log('Can\'t send a MP'))
             await bot.channels.cache.get(config.logsModChannel).send(`<:important:823909697857912923> ${member.user.tag} has been banned by ${message.author} for ${humanizeDuration(duration)} for the reason: ${reason}`)
             setTimeout(() => {
                 message.guild.members.unban(member)
-                member.send('You have been unban from the server.')
+                member.send('You have been unban from the server.').catch(() => console.log('Can\'t send a MP'))
                 bot.channels.cache.get(config.logsModChannel).send(`<:valide:823910319092531201> ${member.user.tag} has been unban automatically.`)
             }, duration)
         } else {
