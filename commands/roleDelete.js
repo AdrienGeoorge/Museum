@@ -7,7 +7,6 @@ module.exports = {
     run: async (message, args, bot) => {
         await message.delete()
         if (message.member.roles.cache.get('823293841288200252')) {
-            await message.delete()
             const collection = args[0]
             const role = args[1].slice(3, args[1].length - 1).replace('&', '')
             let embed

@@ -7,7 +7,6 @@ module.exports = {
     run: async (message, args, bot) => {
         await message.delete()
         if (message.member.roles.cache.get('823293841288200252')) {
-            await message.delete()
             const embed = createEmbed(Object.values(config.reactionRole)[1], 'Talents')
             bot.channels.cache.get(config.channelReaction).send(embed).then(async msg => {
                 const clone = Object.values(config.reactionRole)[1]

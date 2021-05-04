@@ -6,7 +6,6 @@ module.exports = {
     run: async (message) => {
         await message.delete()
         if (message.member.roles.cache.get('823293841288200252')) {
-            await message.delete()
             config.channelWelcome = message.channel.id
             fs.writeFile(fileName, JSON.stringify(config), function writeJSON(err) {
                 if (err) return null

@@ -6,7 +6,6 @@ module.exports = {
     run: async (message, args, bot) => {
         await message.delete()
         if (message.member.roles.cache.get('823293841288200252')) {
-            await message.delete()
             let message = "🇫🇷  **__R È G L E M E N T__**\n\n" +
                 "Le règlement d'**Habbo Museum** détermine les règles de comportement et d’attitude à avoir dans l’enceinte du serveur discord. En devenant membre vous acceptez ce règlement et vous devez le respecter.\n\n" +
                 "En cas de non respect des règles vous pourrez avoir des sanctions qui peuvent aller d’un simple mute, à un kick temporaire voir un bannissement définitif du serveur.\n\n" +
