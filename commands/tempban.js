@@ -20,8 +20,8 @@ module.exports = {
             const rulesMessage = await message.guild.channels.cache.get(config.rules.channel).messages.fetch(config.rules.message)
             await rulesMessage.reactions.resolve(config.rules.name).users.remove(member)
             // Ban and send message
-            await member.ban({reason})
             await member.send(`You have been banned from the server for ${humanizeDuration(duration)} for the reason: ${reason}`).then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP'))
+            await member.ban({reason})
             const embed = new MessageEmbed()
                 .setTitle(`<:important:823909697857912923> ${member.user.tag} has been banned by ${message.author.tag} for ${humanizeDuration(duration)}`)
                 .setDescription(reason)
