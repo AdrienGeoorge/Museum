@@ -18,10 +18,10 @@ module.exports = {
             await member.ban({reason})
             await member.send(`You have been banned from the server for the reason: ${reason}`).then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP')).catch(() => console.log('Can\'t send a MP'))
             const embed = new MessageEmbed()
-                .setTitle(`<:important:823909697857912923> ${member.user.tag} has been banned by ${message.author.tag}`)
+                .setTitle(`<:important:823909697857912923> ${member.user.tag} has been blacklist by ${message.author.tag}`)
                 .setDescription(reason)
                 .setColor('#EEEADA')
-            await bot.channels.cache.get(config.logsModChannel).send(embed)
+            await bot.channels.cache.get(config.blacklistChannel).send(embed)
         } else {
             message.channel.send('<:refuse:823910204613722142> You don\'t have the rights to run this command.').then((msg) => msg.delete({timeout: 3000}))
         }

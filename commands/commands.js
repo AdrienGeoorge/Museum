@@ -5,6 +5,7 @@ module.exports = {
         const embed = new MessageEmbed()
             .setTitle('Commands list')
             .setColor('#EEEADA')
+            .addField('**>commands**', 'Show commands list')
             .addField('**>social**', 'Show our social networks')
             .addField('**>top**', 'Show top levels')
             .addField('**>rank [@user]**', 'Get rank *(user is optional)*')
