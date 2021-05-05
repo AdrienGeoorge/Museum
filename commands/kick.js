@@ -18,7 +18,7 @@ module.exports = {
             await member.kick(reason)
             await member.send(`You have been kicked from the server for the reason: ${reason}`).then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP'))
             const embed = new MessageEmbed()
-                .setTitle(`<:important:823909697857912923> ${member.user.tag} has been kicked by ${message.author}`)
+                .setTitle(`<:important:823909697857912923> ${member.user.tag} has been kicked by ${message.author.tag}`)
                 .setDescription(reason)
                 .setColor('#EEEADA')
             await bot.channels.cache.get(config.logsModChannel).send(embed)

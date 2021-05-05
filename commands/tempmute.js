@@ -24,7 +24,7 @@ module.exports = {
             // Send message to user and logs channel
             await member.send(`You have been muted from the server for ${humanizeDuration(duration)} for the reason: ${reason}.\nPlease read the rules again to get the role **🦄 — Member**.`).then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP'))
             const embed = new MessageEmbed()
-                .setTitle(`<:important:823909697857912923> ${member.user.tag} has been muted by ${message.author} for ${humanizeDuration(duration)}`)
+                .setTitle(`<:important:823909697857912923> ${member.user.tag} has been muted by ${message.author.tag} for ${humanizeDuration(duration)}`)
                 .setDescription(reason)
                 .setColor('#EEEADA')
             await bot.channels.cache.get(config.logsModChannel).send(embed)

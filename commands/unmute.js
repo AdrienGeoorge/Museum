@@ -13,7 +13,7 @@ module.exports = {
             await member.roles.remove(config.muteRole)
             await member.send('You have been unmute from the server.').then(() => console.log('Send a MP')).catch(() => console.log('Can\'t send a MP'))
             const embed = new MessageEmbed()
-                .setTitle(`<:valide:823910319092531201> ${member.user.tag} has been unmute by ${message.author}`)
+                .setTitle(`<:valide:823910319092531201> ${member.user.tag} has been unmute by ${message.author.tag}`)
                 .setColor('#EEEADA')
             await bot.channels.cache.get(config.logsModChannel).send(embed)
         } else {
