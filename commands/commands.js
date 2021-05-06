@@ -9,6 +9,7 @@ module.exports = {
             .addField('**>social**', 'Show our social networks')
             .addField('**>top**', 'Show top levels')
             .addField('**>rank [@user]**', 'Get rank *(user is optional)*')
+            .addField('**>pp [@user]**', 'Get avatar *(user is optional)*')
         // ROLE PARTNER OU STAFF
         if (message.member.roles.cache.get('826908398653800508') || message.member.roles.cache.get('823665644989710416')) {
             embed.addField('**🔶 PARTNER COMMANDS 🔶**', 'Partner role required')
