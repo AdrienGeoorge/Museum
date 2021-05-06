@@ -33,7 +33,7 @@ bot.on('message', async message => {
         if (message.type !== 'DEFAULT' || message.author.bot) return
 
         if (!cooldown.has(message.author.id)) {
-            await addPoints(message)
+            await addPoints(message, bot)
         }
         cooldown.add(message.author.id)
         setTimeout(() => {
@@ -114,6 +114,7 @@ bot.on('guildMemberAdd', async member => {
 
     const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
     channel.send('', attachment)
+    channelMod.send(`${member} as join the server.`)
     channelMod.send('', attachment)
 })
 bot.on('guildMemberRemove', async member => {
@@ -161,6 +162,7 @@ bot.on('guildMemberRemove', async member => {
 
     const attachment = new MessageAttachment(canvas.toBuffer(), 'welcome-image.png')
     channel.send('', attachment)
+    channel.send(`${member} as left the server.`)
 })
 
 bot.on('messageReactionAdd', async (reaction, user) => {
