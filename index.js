@@ -223,7 +223,7 @@ bot.on('messageDelete', async (messageDeleted) => {
         .addField('Message', `${messageDeleted.content} `)
         .setFooter('Supprimé ' + date.toLowerCase())
 
-    bot.channels.cache.get(config.logsChannel).send(deleteEmbed)
+    bot.channels.cache.get(config.logsChannel).send(deleteEmbed).then(() => console.log('Message deleted')).catch(() => console.log('Error when send deleted embed'))
 })
 bot.on('messageUpdate', async (oldMessage, messageUpdate) => {
     if (!messageUpdate.guild || !messageUpdate.author) return
@@ -238,5 +238,5 @@ bot.on('messageUpdate', async (oldMessage, messageUpdate) => {
         .addField('Nouveau message', `${messageUpdate.content} `)
         .setFooter('Modifié ' + date.toLowerCase())
 
-    bot.channels.cache.get(config.logsChannel).send(updateEmbed)
+    bot.channels.cache.get(config.logsChannel).send(updateEmbed).then(() => console.log('Message updated')).catch(() => console.log('Error when send updated embed'))
 })
